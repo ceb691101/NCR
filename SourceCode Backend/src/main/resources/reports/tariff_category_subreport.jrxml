@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="tariff_category_subreport"
+              pageWidth="515"
+              pageHeight="842"
+              columnWidth="515"
+              leftMargin="0"
+              rightMargin="0"
+              topMargin="0"
+              bottomMargin="0">
+
+	<field name="blockNumber" class="java.lang.Integer"/>
+	<field name="blockName" class="java.lang.String"/>
+	<field name="rate" class="java.math.BigDecimal"/>
+	<field name="fixedCharge" class="java.math.BigDecimal"/>
+	<field name="limit" class="java.lang.Short"/>
+
+	<columnHeader>
+		<band height="25" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="0" width="515" height="20" backcolor="#EEEEEE"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#999999"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="5" y="2" width="250" height="16"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Block Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="260" y="2" width="120" height="16"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Rate (Rs/kWh)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="385" y="2" width="125" height="16"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fixed Charge (Rs)]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+
+	<detail>
+		<band height="20" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="0" width="515" height="20" backcolor="#FFFFFF"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineColor="#CCCCCC"/>
+				</graphicElement>
+			</rectangle>
+			<textField isBlankWhenNull="true">
+				<reportElement x="5" y="2" width="250" height="16"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{blockName}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="260" y="2" width="120" height="16"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{rate} != null ? $F{rate} : "-"]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="385" y="2" width="125" height="16"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fixedCharge} != null ? $F{fixedCharge} : "-"]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+
+	<summary>
+		<band height="10" splitType="Stretch"/>
+	</summary>
+</jasperReport>

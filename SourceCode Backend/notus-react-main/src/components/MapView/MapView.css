@@ -1,0 +1,84 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+   Energy Plant Marker Styles (Isolated to Map View)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Base Marker Container */
+.energy-plant-marker {
+  background: transparent !important;
+  border: none !important;
+  display: block;
+}
+
+.plant-pin-container {
+  position: relative;
+  width: 36px;
+  height: 44px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* Base plant pin */
+.plant-pin {
+  width: 36px;
+  height: 36px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: #059669;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 14px rgba(5, 150, 105, 0.35);
+  transition: opacity 0.3s ease, box-shadow 0.3s ease;
+}
+
+.plant-pin svg {
+  width: 20px;
+  height: 20px;
+  transform: rotate(45deg);
+}
+
+/* Online blinking/pulsing animation */
+@keyframes plant-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 6px 14px rgba(5, 150, 105, 0.45);
+  }
+  50% {
+    opacity: 0.4;
+    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.15);
+  }
+}
+
+.plant-pin--online {
+  animation: plant-pulse 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plant-pin--online {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* Co-located plant indicator badge (+) */
+.plant-pin__badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #059669;
+  border: 1.5px solid #059669;
+  font-size: 11px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  z-index: 10;
+  line-height: 1;
+  pointer-events: none;
+}

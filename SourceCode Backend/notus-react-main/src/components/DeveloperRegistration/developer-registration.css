@@ -1,0 +1,21 @@
+/* Scoped spinner removal for Developer Registration form */
+.no-spinner input[type="number"]::-webkit-outer-spin-button,
+.no-spinner input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-spinner input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Prevent Chrome Autofill from forcing bold fonts and light blue backgrounds */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+  -webkit-text-fill-color: #374151 !important; /* text-gray-700 */
+  font-family: inherit !important;
+  font-weight: 400 !important; /* normal font weight */
+}

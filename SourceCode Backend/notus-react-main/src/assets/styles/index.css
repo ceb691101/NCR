@@ -1,0 +1,64 @@
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
+@keyframes logo-glow {
+  0%, 100% {
+    box-shadow: 0 4px 15px rgba(0, 34, 68, 0.25), 0 0 10px rgba(0, 85, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 6px 20px rgba(0, 34, 68, 0.3), 0 0 22px rgba(0, 85, 255, 0.5);
+  }
+}
+
+@keyframes rotate-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.logo-ring {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  padding: 4px;
+  background: #001a33;
+  margin-bottom: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: logo-glow 4s infinite ease-in-out;
+}
+
+/* Rotating gradient background overlay */
+.logo-ring::before {
+  content: '';
+  position: absolute;
+  width: 165%;
+  height: 165%;
+  background: conic-gradient(
+    from 0deg,
+    #001a33 0%,
+    #0055ff 25%,
+    #00d2ff 50%,
+    #0055ff 75%,
+    #001a33 100%
+  );
+  animation: rotate-ring 3.5s linear infinite;
+  z-index: 1;
+}
+
+/* Ensure the inner white div stacks correctly above the pseudo-element spinner */
+.logo-ring > div {
+  position: relative;
+  z-index: 2;
+}
+
+

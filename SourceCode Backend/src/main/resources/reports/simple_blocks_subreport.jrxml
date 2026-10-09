@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+              http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="simple_blocks_subreport"
+              pageWidth="555"
+              pageHeight="842"
+              columnWidth="555"
+              leftMargin="0"
+              rightMargin="0"
+              topMargin="0"
+              bottomMargin="0">
+
+    <!-- Fields from TariffBlockDisplay DTO -->
+    <field name="rangeLabel" class="java.lang.String"/>
+    <field name="energyRate" class="java.lang.String"/>
+    <field name="fixedCharge" class="java.lang.String"/>
+
+    <!-- Column Header Band -->
+    <columnHeader>
+        <band height="25" splitType="Stretch">
+            <!-- Header Background -->
+            <rectangle>
+                <reportElement x="0" y="0" width="555" height="25" backcolor="#7C0000"/>
+                <graphicElement>
+                    <pen lineWidth="0.5"/>
+                </graphicElement>
+            </rectangle>
+
+            <!-- Column 1: Block Range -->
+            <staticText>
+                <reportElement x="5" y="5" width="240" height="20" forecolor="#FFFFFF"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Times New Roman" size="11" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Block Range]]></text>
+            </staticText>
+
+            <!-- Column 2: Energy Rate -->
+            <staticText>
+                <reportElement x="250" y="5" width="140" height="20" forecolor="#FFFFFF"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font fontName="Times New Roman" size="11" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Energy Rate (Rs/kWh)]]></text>
+            </staticText>
+
+            <!-- Column 3: Fixed Charge -->
+            <staticText>
+                <reportElement x="395" y="5" width="150" height="20" forecolor="#FFFFFF"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font fontName="Times New Roman" size="11" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Fixed Charge (Rs)]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <!-- Detail Band - Table Rows -->
+    <detail>
+        <band height="20" splitType="Stretch">
+            <!-- Row Background -->
+            <rectangle>
+                <reportElement x="0" y="0" width="555" height="20" backcolor="#F5F5F5"/>
+                <graphicElement>
+                    <pen lineWidth="0.25" lineColor="#CCCCCC"/>
+                </graphicElement>
+            </rectangle>
+
+            <!-- Block Range Column -->
+            <textField>
+                <reportElement x="5" y="2" width="240" height="16"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Times New Roman" size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{rangeLabel}]]></textFieldExpression>
+            </textField>
+
+            <!-- Energy Rate Column -->
+            <textField>
+                <reportElement x="250" y="2" width="140" height="16"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font fontName="Times New Roman" size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{energyRate}]]></textFieldExpression>
+            </textField>
+
+            <!-- Fixed Charge Column -->
+            <textField>
+                <reportElement x="395" y="2" width="150" height="16"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font fontName="Times New Roman" size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{fixedCharge}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+</jasperReport>

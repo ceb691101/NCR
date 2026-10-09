@@ -1,0 +1,762 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="cc_14daysletter" pageWidth="595" pageHeight="842" columnWidth="455" leftMargin="90" rightMargin="50" topMargin="50" bottomMargin="40">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="296"/>
+	<parameter name="@appNo" class="java.lang.String"/>
+	<parameter name="@costctr" class="java.lang.String"/>
+
+	<queryString>
+		<![CDATA[
+    SELECT b.app_no, e.estimate_no, e.std_cost, b.total_cost, e.partial_amt, e.descr,
+           a.REPRESENTATIVE, a.SCHEME_NAME, a.SCHEME_NO, a.FUND_SOURCE, a.DEV_SEC,
+           a.ELECTORATE, a.SERVICEDEPONAME, a.area_code, a.aga_division, a.district,
+           (SELECT brnach_name
+            FROM province_branch
+            WHERE dept_id = (SELECT dept_id
+                             FROM spestedy_cons
+                             WHERE TRIM(westimate_no) = $P{appNo})) AS branch_name,
+           (SELECT comp_nm
+            FROM glcompm
+            WHERE comp_id IN (SELECT comp_id
+                              FROM gldeptm
+                              WHERE dept_id = a.area_code)) AS area,
+           (SELECT comp_nm
+            FROM glcompm
+            WHERE comp_id IN (SELECT comp_id
+                              FROM gldeptm
+                              WHERE dept_id = $P{costctr})) AS province,
+           (SELECT dept_nm
+            FROM gldeptm
+            WHERE dept_id = $P{costctr}) AS CCT_NAME
+    FROM "SPSNEW"."WIRING_LAND_DETAIL_CON" a,
+         "SPSNEW"."APPLICATION_REFERENCE" d,
+         "SPSNEW"."ESTIMATE_REFERENCEBS" c,
+         "SPSNEW"."SPSTDESTHMT" b,
+         "SPSNEW"."PCESTHTT" e
+    WHERE TRIM(a.APPLICATION_id) = TRIM(d.APPLICATION_id)
+      AND TRIM(d.APPLICATION_NO) = TRIM(b.STD_NO)
+      AND TRIM(c.westimate_no) = TRIM(e.estimate_no)
+      AND TRIM(d.application_no) = TRIM(c.sestimate_no)
+      AND e.dept_id = $P{deptId}
+      AND TRIM(e.estimate_no) = $P{applicationNo}
+    ]]>
+	</queryString>
+	<field name="APP_NO" class="java.lang.String"/>
+	<field name="ESTIMATE_NO" class="java.lang.String"/>
+	<field name="STD_COST" class="java.math.BigDecimal"/>
+	<field name="TOTAL_COST" class="java.lang.Double"/>
+	<field name="PARTIAL_AMT" class="java.math.BigDecimal"/>
+	<field name="DESCR" class="java.lang.String"/>
+	<field name="REPRESENTATIVE" class="java.lang.String"/>
+	<field name="SCHEME_NAME" class="java.lang.String"/>
+	<field name="SCHEME_NO" class="java.lang.String"/>
+	<field name="FUND_SOURCE" class="java.lang.String"/>
+	<field name="DEV_SEC" class="java.lang.String"/>
+	<field name="ELECTORATE" class="java.lang.String"/>
+	<field name="SERVICEDEPONAME" class="java.lang.String"/>
+	<field name="AREA_CODE" class="java.lang.String"/>
+	<field name="AGA_DIVISION" class="java.lang.String"/>
+	<field name="DISTRICT" class="java.lang.String"/>
+	<field name="BRANCH_NAME" class="java.lang.String"/>
+	<field name="AREA" class="java.lang.String"/>
+	<field name="PROVINCE" class="java.lang.String"/>
+	<field name="CCT_NAME" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="410" splitType="Stretch">
+			<textField pattern="MMMMM dd, yyyy" isBlankWhenNull="true">
+				<reportElement key="textField" x="366" y="1" width="89" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="Times New Roman" size="11" isBold="false" isItalic="false"/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[new Date()]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a" isBlankWhenNull="false">
+				<reportElement key="textField" x="314" y="0" width="52" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Date  :"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="1" width="266" height="15"/>
+				<textElement textAlignment="Left">
+					<font fontName="Times New Roman" size="11"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Commercial Engineer/ System Planning Engineer"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="54" width="455" height="15"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="12" isBold="true" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["ALLOCATION OF THE JOB NUMBER"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="69" width="455" height="15"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="11" isBold="true" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Estimate No : " + $F{ESTIMATE_NO} + "AND   Commercial Reference : " +  $F{APP_NO}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="84" width="455" height="1"/>
+			</line>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement key="textField" x="107" y="201" width="348" height="17" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{SCHEME_NAME} == null ? $F{SCHEME_NO} : $F{SCHEME_NAME}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="staticText" x="0" y="201" width="107" height="17" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Name of the Scheme]]></text>
+			</staticText>
+			<staticText>
+				<reportElement key="staticText" x="0" y="218" width="107" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Funding Source ]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement key="textField" x="107" y="218" width="348" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{FUND_SOURCE}.trim()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="staticText" x="0" y="250" width="107" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Divisional  Secretariat]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement key="textField" x="107" y="250" width="143" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{DEV_SEC}.trim()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="staticText" x="0" y="233" width="107" height="17" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<text><![CDATA[District]]></text>
+			</staticText>
+			<staticText>
+				<reportElement key="staticText" x="250" y="250" width="74" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Electorate]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement key="textField" x="107" y="233" width="348" height="17" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{DISTRICT}.trim()]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement key="textField" x="324" y="250" width="131" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{ELECTORATE}.trim()]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement key="textField" x="324" y="265" width="131" height="17" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{SERVICEDEPONAME}.trim()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="staticText" x="0" y="265" width="107" height="17" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Area]]></text>
+			</staticText>
+			<staticText>
+				<reportElement key="staticText" x="250" y="265" width="74" height="17" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<text><![CDATA[CSC]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement key="textField" x="107" y="265" width="143" height="17" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{AREA_CODE}.trim()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="16" width="266" height="23"/>
+				<textElement textAlignment="Left">
+					<font fontName="Times New Roman" size="11"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{PROVINCE}.trim()]]></textFieldExpression>
+			</textField>
+			<textField pattern="MMMMM dd, yyyy" isBlankWhenNull="false">
+				<reportElement key="textField-1" x="0" y="95" width="455" height="95" backcolor="#F9FFF9"/>
+				<box>
+					<pen lineWidth="0.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Justified">
+					<font fontName="Arial" size="10" isBold="false" isUnderline="false" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Please find the  8 nos of copies of Work Estimates of the following job, recommended by Chief Engineer (Construction) for the approval of Deputy General Manager.\n\n"+
+
+"Take action to submit the estimate  to DGM ( "+ $F{PROVINCE}.trim()+ " )"+ "with other relevant information for the approval of DGM and forward the same to "+
+"Accountant (Expenditure) to assign the job Number.\n\n"+
+
+"Please return  5 nos  of copies of the Estimate including  job number at your earliest."]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement key="textField" x="107" y="282" width="348" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{DESCR}.trim()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="staticText" x="0" y="282" width="107" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Work Scope]]></text>
+			</staticText>
+			<staticText>
+				<reportElement key="staticText" x="250" y="297" width="74" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Standard Cost (Rs.)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement key="staticText" x="0" y="297" width="107" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Total Cost (Rs.)]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement key="textField" x="107" y="312" width="110" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{PARTIAL_AMT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="staticText" x="0" y="312" width="107" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Rebate Cost (Rs.)]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement key="textField" x="324" y="312" width="131" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.Double"><![CDATA[new Double($F{STD_COST}.doubleValue()-$F{PARTIAL_AMT}.doubleValue()-$F{TOTAL_COST}.doubleValue())]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement key="textField" x="107" y="327" width="348" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.Double"><![CDATA[new Double(($F{STD_COST}.doubleValue()-$F{PARTIAL_AMT}.doubleValue()-$F{TOTAL_COST}.doubleValue())/$F{TOTAL_COST}.doubleValue())]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="staticText" x="0" y="327" width="107" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Variance Percentage (%)]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement key="textField" x="324" y="297" width="131" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.Double"><![CDATA[$F{TOTAL_COST}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="staticText" x="217" y="312" width="107" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Variance Amount (Rs.)]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement key="textField" x="107" y="297" width="143" height="15" backcolor="#FFF0E8"/>
+				<box>
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{STD_COST}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2" y="388" width="168" height="15"/>
+				<textElement>
+					<font fontName="Times New Roman" size="11"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["("+ $F{PROVINCE}.trim()+")"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2" y="373" width="168" height="15"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="11"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Chief Engineer (Construction)  "]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band splitType="Stretch"/>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<lastPageFooter>
+		<band/>
+	</lastPageFooter>
+	<summary>
+		<band height="325" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="230" y="0" width="225" height="109"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font fontName="Arial" size="11" isBold="true"/>
+				</textElement>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="230" height="109"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font fontName="Arial" size="11" isBold="true"/>
+				</textElement>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="190" width="230" height="135"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font fontName="Arial" size="11" isBold="true"/>
+				</textElement>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="230" y="190" width="225" height="135"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font fontName="Arial" size="11" isBold="true"/>
+				</textElement>
+			</textField>
+			<textField>
+				<reportElement x="0" y="15" width="230" height="27"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Funds available under the payment PIV.Recommended to issue the job number."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2" y="79" width="230" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Commecial/Sys.Planing Engineer"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="42" width="230" height="30"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="9" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["PIV No.   ----------------------------       dated on  ------------------"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="93" width="230" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["(Stamp)                                        (Date)"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="230" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["DGM -("+ $F{PROVINCE}.trim()+")"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="232" y="64" width="225" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["DGM -("+ $F{PROVINCE}.trim()+")                                       Date"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="232" y="30" width="225" height="27"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Recommended / Approved to issue Job Number subject to availability of funds."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="230" y="0" width="225" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["AGM (DD1/DD2/DD3/DD4)"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="230" y="94" width="225" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["(Stamp)                                        (Date)"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="133" width="457" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Approved to issue a Job Number subject to availability of funds."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="108" width="457" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Deputy General Manager -("+ $F{PROVINCE}.trim()+")/ Accountant -Expenditure"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="302" y="175" width="153" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["(Stamp)"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="302" y="160" width="153" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["AGM (DD1/DD2/DD3/DD4)"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="109" width="455" height="81"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font fontName="Arial" size="11" isBold="true"/>
+				</textElement>
+			</textField>
+			<textField>
+				<reportElement x="0" y="293" width="230" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Accountant - Expenditure                                                                                                                                                        Date"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="205" width="230" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Following job number is issued for the above job."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="308" width="230" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[" (Stamp)                                        (Date)"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="261" width="230" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["-----------------------------------------------------                                                                                                                         ---------"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="190" width="230" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Commercial/System Planning Engineer"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="230" y="205" width="225" height="43"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Copies of the work estimate of the above job approved by DGM  / AGM , with job number marked on the same are forwarded herewith, please."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="232" y="310" width="223" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[" (Stamp)                                        (Date)"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="232" y="278" width="223" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Commercial/System Planning Engineer"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="232" y="190" width="223" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Chief Engineer(Construction)"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="232" y="15" width="223" height="15"/>
+				<textElement>
+					<font fontName="Arial" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Accountant (Exp)- "+ $F{PROVINCE}.trim()]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

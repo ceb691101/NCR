@@ -1,0 +1,7 @@
+<svg width="100%" viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Hydro energy icon</title>
+  <desc>A flat slate-grey icon showing water waves and a droplet inside a circular badge, symbolizing mini hydro energy.</desc>
+
+  <path d="M340 90 C310 140 290 170 290 190 C290 218 312 240 340 240 C368 240 390 218 390 190 C390 170 370 140 340 90 Z" fill="#5F5E5A"/>
+  <path d="M305 190 C315 220 365 220 375 190" fill="none" stroke="#F1EFE8" stroke-width="2.5" stroke-linecap="round" opacity="0.55"/>
+</svg>

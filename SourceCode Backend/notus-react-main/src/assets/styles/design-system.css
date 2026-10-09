@@ -1,0 +1,958 @@
+/* ============================================================================
+ * NCRE Design System — Foundation
+ * ----------------------------------------------------------------------------
+ * Single source of truth for the visual language of the authenticated
+ * (NCRE) application. The login page is intentionally NOT themed by this file
+ * and keeps its own self-contained styles.
+ *
+ * Direction: simple, calm, professional, spacious, corporate.
+ *   - Deep navy primary (inherited from the NSO / CEB login page: #002244)
+ *   - White surfaces on a very light blue-grey page background
+ *   - Subtle blue accents
+ *   - Green = success / received, Amber = warning / pending, Red = critical only
+ *   - Subtle 1px borders + very light shadows (never heavy)
+ *   - Moderate radii (10px controls, 12px cards)
+ *   - 8px-based spacing scale
+ *
+ * HOW TO USE
+ *   1. Prefer the semantic primitives in the "COMPONENT PRIMITIVES" section
+ *      (`class="ds-card"`, `class="ds-btn ds-btn-primary"`, ...).
+ *   2. When a Tailwind utility is needed, use the brand scales defined in
+ *      `tailwind.config.js`: `navy-*`, `ink-*`, `success-*`, `warning-*`,
+ *      `critical-*`, plus `ds-1..ds-9` (8px spacing), `shadow-card`,
+ *      `text-page/title/section/kpi/body/label/caption`.
+ *   3. Never hard-code hex values in JSX.
+ *
+ *   Chart.js series colours and inline SVG `stopColor` attributes are the one
+ *   exception - they are plain JavaScript, not CSS, so they repeat the token
+ *   values literally (e.g. `#047857` = success-700, `#B45309` = warning-700,
+ *   `#0D3A68` = navy-700, `#414C5C` = ink-700).
+ *
+ * NOTE ON LAYERS
+ *   `tailwind.css` (legacy Notus v2 build) is UNLAYERED, so it beats any
+ *   `@layer` rule regardless of specificity. Component primitives therefore use
+ *   uniquely-prefixed `ds-*` names, which cannot collide with it, and Tailwind
+ *   utilities always win over components (layer order: base < components <
+ *   utilities).
+ * ========================================================================== */
+
+/* ============================================================================
+ * 1. DESIGN TOKENS
+ * ----------------------------------------------------------------------------
+ * Exposed as space-separated sRGB channels so Tailwind can compose them with
+ * `<alpha-value>` (see tailwind.config.js). Changing a value here updates both
+ * the generated utilities and every hand-written rule below.
+ * ========================================================================== */
+
+/* Declared so the `@layer components` blocks below have a matching layer in
+ * this file (PostCSS processes each stylesheet in isolation). The layer order
+ * is fixed by assets/styles/index.css, which is imported first:
+ * base < components < utilities. */
+@tailwind components;
+
+:root {
+  /* -- Brand: deep navy ------------------------------------------------ */
+  --ncre-navy-50: 244 247 251;
+  --ncre-navy-100: 231 238 247;
+  --ncre-navy-200: 201 220 236;
+  --ncre-navy-300: 157 188 217;
+  --ncre-navy-400: 107 149 192;
+  --ncre-navy-500: 65 115 163;
+  --ncre-navy-600: 26 77 128;
+  --ncre-navy-700: 13 58 104;
+  --ncre-navy-800: 0 34 68; /* PRIMARY — NSO brand navy (login page) */
+  --ncre-navy-900: 0 26 51;
+  --ncre-navy-950: 0 17 34; /* DEEPEST */
+
+  /* -- Ink: blue-grey neutrals (text, borders, surfaces) --------------- */
+  --ncre-ink-50: 248 250 252;
+  --ncre-ink-100: 244 247 250; /* PAGE BACKGROUND */
+  --ncre-ink-200: 230 235 242; /* HAIRLINE BORDER */
+  --ncre-ink-300: 211 219 230;
+  --ncre-ink-400: 170 181 196;
+  --ncre-ink-500: 124 135 152; /* MUTED TEXT */
+  --ncre-ink-600: 91 102 118; /* SECONDARY TEXT */
+  --ncre-ink-700: 65 76 92; /* BODY TEXT */
+  --ncre-ink-800: 43 52 65; /* HEADINGS */
+  --ncre-ink-900: 26 33 44; /* PAGE TITLES */
+
+  /* -- Semantic: success / received ------------------------------------ */
+  --ncre-success-50: 236 253 245;
+  --ncre-success-100: 209 250 229;
+  --ncre-success-500: 16 185 129;
+  --ncre-success-600: 5 150 105;
+  --ncre-success-700: 4 120 87;
+  --ncre-success-800: 6 95 70;
+
+  /* -- Semantic: warning / pending ------------------------------------- */
+  --ncre-warning-50: 255 251 235;
+  --ncre-warning-100: 254 243 199;
+  --ncre-warning-500: 245 158 11;
+  --ncre-warning-600: 217 119 6;
+  --ncre-warning-700: 180 83 9;
+  --ncre-warning-800: 146 64 14;
+
+  /* -- Semantic: critical (errors, failures only) ----------------------- */
+  --ncre-critical-50: 254 242 242;
+  --ncre-critical-100: 254 226 226;
+  --ncre-critical-500: 239 68 68;
+  --ncre-critical-600: 220 38 38;
+  --ncre-critical-700: 185 28 28;
+  --ncre-critical-800: 153 27 27;
+
+  /* -- Brand: NSO red ---------------------------------------------------- */
+  --ncre-brandred: 124 0 0; /* #7C0000 — legacy `red4` */
+  --ncre-brandred-dark: 92 0 0; /* #5C0000 */
+  --ncre-brandred-deep: 138 25 0; /* #8A1900 */
+
+  /* -- Non-colour tokens ---------------------------------------------- */
+  --ncre-sidebar-width: 260px;
+  --ncre-topbar-height: 64px;
+}
+
+/* ============================================================================
+ * 2. TYPOGRAPHY PRIMITIVES
+ *    Scale: page > section > body > caption > label. KPI numerals are
+ *    restrained (30px) and tabular so columns of figures stay aligned.
+ * ========================================================================== */
+
+@layer components {
+  .ds-page-title {
+    @apply font-sans text-page font-bold text-ink-900;
+  }
+
+  .ds-page-subtitle {
+    @apply font-sans text-body text-ink-500;
+  }
+
+  .ds-section-title {
+    @apply font-sans text-section font-semibold text-ink-800;
+  }
+
+  .ds-body {
+    @apply font-sans text-body text-ink-700;
+  }
+
+  .ds-body-sm {
+    @apply font-sans text-body-sm text-ink-600;
+  }
+
+  /* Small supporting label — uppercase, tracked out, quiet. */
+  .ds-label {
+    @apply font-sans text-label font-semibold uppercase text-ink-500;
+  }
+
+  .ds-caption {
+    @apply font-sans text-caption text-ink-500;
+  }
+
+  /* Large but restrained KPI numeral. */
+  .ds-kpi-value {
+    @apply font-sans text-kpi font-bold text-ink-900;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  /* Technical data: meter numbers, account ids, codes. */
+  .ds-mono {
+    @apply font-mono text-body-sm text-ink-700;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ============================================================================
+ * 3. LAYOUT PRIMITIVES
+ * ========================================================================== */
+
+@layer components {
+  /* Content column offset by the fixed sidebar (see layouts/*.js).
+     `pt-topbar` clears the fixed mobile bar, which is only rendered by the
+     sidebar - so every layout gets the clearance whether or not it mounts a
+     HeaderTopBar. */
+  .ds-shell {
+    @apply relative md:ml-sidebar pt-topbar md:pt-0 min-h-screen flex flex-col bg-ink-100
+           transition-[margin] duration-200 ease-out;
+  }
+
+  /* Horizontal page gutter — generous, consistent 8px rhythm. */
+  .ds-content {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Section spacing between stacked blocks. */
+  .ds-stack {
+    @apply flex flex-col gap-ds-6;
+  }
+}
+
+/* ============================================================================
+ * 4. SURFACE PRIMITIVES
+ *    Subtle border + very light shadow. No heavy borders, no strong shadows.
+ * ========================================================================== */
+
+@layer components {
+  .ds-card {
+    @apply bg-white border border-ink-200 rounded-xl shadow-card;
+  }
+
+  .ds-card-header {
+    @apply flex flex-wrap items-center justify-between gap-3 px-ds-5 py-ds-4 border-b border-ink-200;
+  }
+
+  .ds-card-title {
+    @apply font-sans text-section font-semibold text-ink-800;
+  }
+
+  .ds-card-subtitle {
+    @apply font-sans text-caption text-ink-500;
+  }
+
+  .ds-card-body {
+    @apply p-ds-5;
+  }
+
+  .ds-card-footer {
+    @apply flex flex-wrap items-center justify-between gap-3 px-ds-5 py-ds-3 border-t border-ink-200 bg-ink-50 rounded-b-xl;
+  }
+
+  /* Flat inset panel for secondary blocks inside a card. */
+  .ds-panel {
+    @apply bg-ink-50 border border-ink-200 rounded-lg;
+  }
+
+  .ds-divider {
+    @apply border-t border-ink-200;
+  }
+}
+
+/* ============================================================================
+ * 5. BUTTONS
+ *    Solid navy primary, quiet outlined secondary. Radii match the login page
+ *    (10px). Uppercase tracking only on the compact/label scale.
+ * ========================================================================== */
+
+@layer components {
+  .ds-btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg
+           text-body-sm font-semibold leading-none whitespace-nowrap
+           border border-transparent cursor-pointer select-none
+           transition-colors duration-150 ease-out
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-navy-800/25 focus-visible:ring-offset-1
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none;
+  }
+
+  .ds-btn-primary {
+    @apply bg-navy-800 text-white hover:bg-navy-900 active:bg-navy-950;
+  }
+
+  .ds-btn-secondary {
+    @apply bg-white text-ink-700 border-ink-300 hover:bg-ink-50 hover:border-ink-400 active:bg-ink-100;
+  }
+
+  .ds-btn-ghost {
+    @apply bg-transparent text-navy-700 hover:bg-navy-50 active:bg-navy-100;
+  }
+
+  .ds-btn-success {
+    @apply bg-success-600 text-white hover:bg-success-700 active:bg-success-800;
+  }
+
+  /* Critical actions only (delete, revoke, reject). */
+  .ds-btn-danger {
+    @apply bg-critical-600 text-white hover:bg-critical-700 active:bg-critical-800;
+  }
+
+  .ds-btn-sm {
+    @apply px-3 py-2 text-caption rounded-md;
+  }
+
+  .ds-btn-lg {
+    @apply px-5 py-3 text-body rounded-lg;
+  }
+
+  /* Square icon-only control. */
+  .ds-btn-icon {
+    @apply w-9 h-9 p-0 rounded-lg;
+  }
+}
+
+/* ============================================================================
+ * 6. FORMS
+ *    Matches the login page: #f8f8f8 fill, soft 1.5px border, 10px radius,
+ *    navy focus ring at 12% opacity.
+ * ========================================================================== */
+
+@layer components {
+  .ds-label-field {
+    @apply block text-label font-semibold uppercase text-ink-600 mb-1.5;
+  }
+
+  .ds-input,
+  .ds-select,
+  .ds-textarea {
+    @apply w-full px-3.5 py-2.5 rounded-lg text-body text-ink-800
+           bg-ink-50 border border-ink-300
+           placeholder:text-ink-400
+           transition-colors duration-150 ease-out
+           focus:outline-none focus:bg-white focus:border-navy-700
+           focus:ring-2 focus:ring-navy-800/10
+           disabled:bg-ink-100 disabled:text-ink-400 disabled:cursor-not-allowed;
+  }
+
+  .ds-textarea {
+    @apply min-h-[88px] leading-relaxed;
+  }
+
+  .ds-hint {
+    @apply mt-1.5 text-caption text-ink-500;
+  }
+
+  .ds-error-text {
+    @apply mt-1.5 text-caption text-critical-700;
+  }
+
+  /* Invalid state — apply alongside a control. */
+  .ds-input-error {
+    @apply border-critical-500 focus:border-critical-600 focus:ring-critical-600/10;
+  }
+}
+
+/* ============================================================================
+ * 7. BADGES / STATUS
+ *    Tinted background + deep text. No saturated fills.
+ * ========================================================================== */
+
+@layer components {
+  .ds-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md
+           text-caption font-semibold leading-none whitespace-nowrap
+           border;
+  }
+
+  .ds-badge-neutral {
+    @apply bg-ink-100 text-ink-600 border-ink-200;
+  }
+
+  .ds-badge-info {
+    @apply bg-navy-50 text-navy-700 border-navy-200;
+  }
+
+  .ds-badge-success {
+    @apply bg-success-50 text-success-700 border-success-100;
+  }
+
+  .ds-badge-warning {
+    @apply bg-warning-50 text-warning-700 border-warning-100;
+  }
+
+  .ds-badge-critical {
+    @apply bg-critical-50 text-critical-700 border-critical-100;
+  }
+}
+
+/* ============================================================================
+ * 8. KPI TILE
+ *    Label row (status dot + label + quiet feature icon), then the primary
+ *    figure, then the trend pinned to the bottom. `h-full` keeps a row of tiles
+ *    the same height regardless of figure length.
+ * ========================================================================== */
+
+@layer components {
+  .ds-kpi {
+    @apply bg-white border border-ink-200 rounded-xl shadow-card
+           p-ds-4 h-full flex flex-col
+           transition-shadow duration-150 ease-out;
+  }
+
+  .ds-kpi-compact {
+    @apply p-ds-3 min-h-[120px];
+  }
+
+  .ds-kpi:hover {
+    @apply shadow-md;
+  }
+
+  /* When a KPI is wrapped in a link, give the whole tile a clear affordance. */
+  a:hover > .ds-kpi,
+  a:focus-visible > .ds-kpi {
+    @apply shadow-md border-ink-300;
+  }
+
+  a:focus-visible > .ds-kpi {
+    @apply ring-2 ring-navy-800/20;
+  }
+
+  .ds-kpi-icon {
+    @apply w-7 h-7 flex-none flex items-center justify-center rounded-md
+           text-xs bg-navy-50 text-navy-700 border border-navy-100;
+  }
+
+  /* Status dot beside a KPI label. */
+  .ds-kpi-dot {
+    @apply w-1.5 h-1.5 rounded-full flex-none;
+  }
+}
+
+/* ============================================================================
+ * 9. TABLES
+ * ========================================================================== */
+
+@layer components {
+  .ds-table-wrap {
+    @apply w-full overflow-x-auto;
+  }
+
+  .ds-table {
+    @apply w-full text-body-sm border-collapse;
+  }
+
+  .ds-th {
+    @apply px-ds-4 py-3 text-left text-label font-semibold uppercase text-ink-500
+           bg-ink-50 border-b border-ink-200 whitespace-nowrap;
+  }
+
+  .ds-td {
+    @apply px-ds-4 py-3 text-ink-700 border-b border-ink-200 align-middle;
+  }
+
+  .ds-tr {
+    @apply bg-white transition-colors duration-100;
+  }
+
+  .ds-tr:hover {
+    @apply bg-ink-50;
+  }
+
+  /* Loading / empty message rendered as a full-width table row. */
+  .ds-table-state {
+    @apply text-center py-ds-8 px-ds-4 text-body-sm text-ink-500;
+  }
+
+  .ds-table-state-title {
+    @apply font-sans text-body font-semibold text-ink-700 mt-2;
+  }
+
+  .ds-table-state-hint {
+    @apply font-sans text-caption text-ink-400 mt-1;
+  }
+}
+
+/* ============================================================================
+ * 10. APPLICATION NAVIGATION
+ *     Consumed by components/Sidebar/Sidebar.js
+ *
+ *     One unified vertical list on a deep navy ground. Rows read as a list, not
+ *     as buttons: quiet by default, a faint wash on hover, and only the current
+ *     page gets the light-blue tint plus a 2px accent rail.
+ * ========================================================================== */
+
+@layer components {
+  .ds-nav {
+    @apply flex flex-col gap-0.5;
+  }
+
+  /* Section heading inside the sidebar ("MONTHLY READINGS", ...). */
+  .ds-nav-group {
+    @apply px-3 pt-5 pb-2 text-label font-semibold uppercase text-navy-400;
+  }
+
+  /* ── Top-level row ───────────────────────────────────────────────────── */
+  /* Quiet by default: a calm label (navy-300, 8:1 on navy-800) with a dimmer
+     icon (navy-400, 5.1:1) so the eye reads label-before-icon, not a wall of
+     bright chips. White only on hover / current page. */
+  .ds-nav-item {
+    @apply relative flex items-center gap-3 min-h-10 px-3 py-2 rounded-md
+           text-body-sm font-medium text-navy-300
+           transition-colors duration-150 ease-out cursor-pointer;
+  }
+
+  .ds-nav-item:hover {
+    @apply bg-white/8 text-white;
+  }
+
+  /* Current page: subtle light-blue wash + 2px accent rail. */
+  .ds-nav-item-active {
+    @apply bg-navy-300/16 text-white font-semibold;
+    box-shadow: inset 2px 0 0 0 rgb(var(--ncre-navy-200));
+  }
+
+  /* Parent of the current page: brightened, but no tint or accent rail. */
+  .ds-nav-item-open {
+    @apply text-white;
+  }
+
+  /* ── Icon ────────────────────────────────────────────────────────────── */
+  .ds-nav-icon {
+    @apply w-4 h-4 flex-none flex items-center justify-center
+           text-sm text-navy-400 transition-colors duration-150 ease-out;
+  }
+
+  .ds-nav-item:hover .ds-nav-icon,
+  .ds-nav-item-open .ds-nav-icon,
+  .ds-nav-item-active .ds-nav-icon {
+    @apply text-navy-100;
+  }
+
+  .ds-nav-item:hover .ds-nav-chevron,
+  .ds-nav-item-open .ds-nav-chevron {
+    @apply text-navy-100;
+  }
+
+  /* ── Nested levels ────────────────────────────────────────────────────── */
+  .ds-nav-sub {
+    @apply mt-1 mb-2 ml-5 pl-3 border-l border-white/10 flex flex-col gap-0.5;
+  }
+
+  .ds-nav-sub-item {
+    @apply block px-2.5 py-1.5 rounded-md text-caption font-medium text-navy-400
+           transition-colors duration-150 ease-out cursor-pointer;
+  }
+
+  .ds-nav-sub-item:hover {
+    @apply bg-white/8 text-white;
+  }
+
+  .ds-nav-sub-item-active {
+    @apply bg-navy-300/16 text-white font-semibold;
+  }
+
+  /* Third level. */
+  .ds-nav-sub-sub {
+    @apply mt-0.5 mb-1 ml-2 pl-3 border-l border-white/10 flex flex-col gap-0.5;
+  }
+
+  .ds-nav-sub-sub-item {
+    @apply block px-2.5 py-1.5 rounded text-caption text-navy-400
+           transition-colors duration-150 ease-out cursor-pointer;
+  }
+
+  .ds-nav-sub-sub-item:hover {
+    @apply bg-white/8 text-white;
+  }
+
+  .ds-nav-sub-sub-item-active {
+    @apply bg-navy-300/16 text-white font-semibold;
+  }
+
+  /* Disclosure chevron. */
+  .ds-nav-chevron {
+    @apply flex-none text-[10px] text-navy-400 transition-transform duration-150 ease-out;
+  }
+
+}
+
+/* ============================================================================
+ * 11. UTILITIES
+ * ========================================================================== */
+
+@layer components {
+  /* Consistent focus treatment, matching the login page. */
+  .ds-focus-ring {
+    @apply outline-none focus:ring-2 focus:ring-navy-800/12 focus:border-navy-700;
+  }
+
+  .ds-skeleton {
+    @apply bg-ink-200 rounded animate-pulse;
+  }
+
+  /* Empty / no-data state. */
+  .ds-empty {
+    @apply flex flex-col items-center justify-center text-center gap-2 py-ds-9 px-ds-5 text-ink-500;
+  }
+
+  /* Toolbar strip above tables / filters. */
+  .ds-toolbar {
+    @apply flex flex-wrap items-center gap-3 px-ds-4 py-ds-3
+           bg-white border border-ink-200 rounded-lg;
+  }
+}
+
+/* ============================================================================
+ * 12. LOADING, OVERLAY & MODAL
+ *     One spinner, one scrim, one modal shell for the whole application.
+ * ========================================================================== */
+
+@layer components {
+  /* ── Loading ─────────────────────────────────────────────────────────── */
+  /* Single restrained indicator. Slow enough to read as calm rather than
+     frantic, and it stops entirely for reduced-motion users. */
+  .ds-spinner {
+    @apply inline-block rounded-full border-2 border-ink-200 border-t-navy-700
+           animate-spin;
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .ds-spinner-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 2px;
+  }
+
+  /* Spinner for use on top of a navy / dark surface. */
+  .ds-spinner-invert {
+    border-color: rgb(255 255 255 / 0.28);
+    border-top-color: #ffffff;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ds-spinner {
+      animation: none;
+      border-top-color: rgb(var(--ncre-navy-700));
+    }
+    .ds-spinner-invert {
+      animation: none;
+      border-top-color: #ffffff;
+    }
+    /* Entrances become instant rather than removed, so nothing shifts. */
+    .ds-menu,
+    .ds-modal,
+    [class*="animate-fade-in"] {
+      animation: none !important;
+    }
+    .ds-skeleton,
+    .ds-skeleton-text {
+      animation: none;
+    }
+  }
+
+  /* Full-screen loading state (route guards, session checks). */
+  .ds-page-loading {
+    @apply fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-ink-100;
+  }
+
+  /* Centred loading block for cards, panels and full sections. */
+  .ds-loading {
+    @apply flex flex-col items-center justify-center gap-3 py-ds-9 px-ds-5 text-center;
+  }
+
+  .ds-loading-label {
+    @apply font-sans text-body-sm text-ink-500;
+  }
+
+  /* Skeleton placeholder bar. */
+  .ds-skeleton-text {
+    @apply h-3 rounded bg-ink-200 animate-pulse;
+  }
+
+  /* ── Overlay ─────────────────────────────────────────────────────────── */
+  /* Solid scrim — deliberately no blur or glass effect. */
+  .ds-overlay {
+    @apply fixed inset-0 z-40 bg-navy-950/60;
+  }
+
+  .ds-overlay-soft {
+    @apply fixed inset-0 z-40 bg-navy-950/45;
+  }
+
+  /* ── Modal ───────────────────────────────────────────────────────────── */
+  .ds-modal {
+    @apply relative z-50 w-full max-w-lg mx-4 bg-white rounded-xl
+           border border-ink-200 shadow-overlay
+           flex flex-col max-h-[90vh];
+  }
+
+  .ds-modal-header {
+    @apply flex items-start justify-between gap-4 px-ds-5 py-ds-4 border-b border-ink-200;
+  }
+
+  .ds-modal-title {
+    @apply font-sans text-section font-semibold text-ink-900;
+  }
+
+  .ds-modal-subtitle {
+    @apply font-sans text-body-sm text-ink-500 mt-1;
+  }
+
+  .ds-modal-body {
+    /* Both axes scroll so a wide table inside a modal can never force the
+       whole page to scroll sideways. */
+    @apply px-ds-5 py-ds-4 overflow-y-auto overflow-x-auto;
+  }
+
+  .ds-modal-footer {
+    @apply flex flex-wrap items-center justify-end gap-3 px-ds-5 py-ds-4
+           border-t border-ink-200 bg-ink-50 rounded-b-xl;
+  }
+
+  /* Close affordance shared by every modal header. */
+  .ds-modal-close {
+    @apply flex-none w-8 h-8 flex items-center justify-center rounded-md
+           text-ink-400 hover:text-ink-700 hover:bg-ink-100
+           transition-colors duration-150 cursor-pointer
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-navy-800/20;
+  }
+
+  /* ── Filter / search input with a leading icon ───────────────────────── */
+  .ds-filter-input {
+    @apply ds-input pl-12;
+  }
+
+  .ds-page-toolbar {
+    @apply flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  .ds-page-actions {
+    @apply flex flex-none items-center gap-2 sm:ml-auto;
+  }
+
+  .ds-filter-icon {
+    @apply absolute left-0 inset-y-0 flex items-center pl-3.5 pointer-events-none
+           text-ink-400 text-body-sm;
+  }
+
+  /* ── Status dot ──────────────────────────────────────────────────────── */
+  .ds-dot {
+    @apply w-2 h-2 rounded-full flex-none inline-block;
+  }
+
+  /* ==========================================================================
+   * 13. PAGE FURNITURE
+   *     Shared page-level building blocks, so every screen is assembled from
+   *     the same parts rather than re-inventing them per page.
+   * ======================================================================= */
+
+  /* ── Page header band ─────────────────────────────────────────────────
+   * Sits at the top of a page's own card or tinted band. Optional contextual
+   * description and a right-hand action slot. */
+  .ds-page-header {
+    @apply flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3
+           px-ds-5 py-ds-4 border-b border-ink-200;
+  }
+
+  .ds-page-header-title {
+    @apply font-sans text-section font-semibold text-ink-900;
+  }
+
+  .ds-page-header-sub {
+    @apply font-sans text-body-sm text-ink-600 mt-1;
+  }
+
+  /* Compact header for dense panels (no border rule). */
+  .ds-panel-header {
+    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3
+           px-ds-4 py-ds-3;
+  }
+
+  /* ── Tabs ─────────────────────────────────────────────────────────────── */
+  .ds-tabs {
+    @apply flex items-center gap-1 p-1 bg-ink-100 rounded-lg overflow-x-auto;
+  }
+
+  .ds-tab {
+    @apply inline-flex items-center gap-2 whitespace-nowrap
+           px-3 py-2 rounded-md text-body-sm font-medium text-ink-600
+           transition-colors duration-150 ease-out cursor-pointer
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-navy-800/20;
+  }
+
+  .ds-tab:hover {
+    @apply bg-white/70 text-ink-900;
+  }
+
+  .ds-tab-active {
+    @apply bg-white text-navy-800 font-semibold shadow-xs;
+  }
+
+  /* Underline variant — used where tabs sit directly on a card edge. */
+  .ds-tabs-underline {
+    @apply flex items-center gap-1 border-b border-ink-200 overflow-x-auto;
+  }
+
+  .ds-tab-underline {
+    @apply inline-flex items-center gap-2 whitespace-nowrap
+           px-3.5 py-2.5 text-body-sm font-medium text-ink-600
+           border-b-2 border-transparent -mb-px
+           transition-colors duration-150 ease-out cursor-pointer
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-navy-800/20;
+  }
+
+  .ds-tab-underline:hover {
+    @apply text-navy-800 border-ink-300;
+  }
+
+  .ds-tab-underline-active {
+    @apply text-navy-800 font-semibold border-navy-700;
+  }
+
+  /* ── Stat card icon tile ──────────────────────────────────────────────── */
+  .ds-stat-card {
+    @apply bg-white border border-ink-200 rounded-xl shadow-card
+           p-ds-4 flex items-center gap-4
+           transition-shadow duration-150 ease-out;
+  }
+
+  /* Clickable variant — used where a stat card doubles as a tab/filter. */
+  .ds-stat-card-action {
+    @apply cursor-pointer text-left w-full;
+  }
+
+  .ds-stat-card-action:hover {
+    @apply shadow-md;
+  }
+
+  .ds-stat-card-active {
+    @apply border-navy-700 ring-2 ring-navy-700/15;
+  }
+
+  .ds-stat-icon {
+    @apply w-11 h-11 rounded-lg flex-none flex items-center justify-center
+           text-base border;
+  }
+
+  .ds-stat-icon-info {
+    @apply bg-navy-50 text-navy-700 border-navy-100;
+  }
+
+  .ds-stat-icon-success {
+    @apply bg-success-50 text-success-700 border-success-100;
+  }
+
+  .ds-stat-icon-warning {
+    @apply bg-warning-50 text-warning-700 border-warning-100;
+  }
+
+  .ds-stat-icon-critical {
+    @apply bg-critical-50 text-critical-700 border-critical-100;
+  }
+
+  /* Stat card internals — same hierarchy as the dashboard KPI tile. */
+  .ds-stat-label {
+    @apply ds-label;
+  }
+
+  .ds-stat-value {
+    @apply font-sans text-title font-semibold text-ink-900 mt-0.5;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  .ds-stat-note {
+    @apply ds-caption mt-0.5;
+  }
+
+  /* ── Action row ───────────────────────────────────────────────────────── */
+  .ds-actions {
+    @apply flex flex-wrap items-center gap-3;
+  }
+
+  /* ── Filter / search toolbar ──────────────────────────────────────────── */
+  .ds-filter-bar {
+    @apply flex flex-wrap items-center gap-3 px-ds-5 py-ds-4
+           border-b border-ink-200 bg-ink-50 rounded-t-xl;
+  }
+
+  /* ── Read-only / computed value display ───────────────────────────────── */
+  .ds-readonly-value {
+    @apply w-full px-3.5 py-2.5 rounded-lg text-body
+           bg-ink-100 border border-ink-200 text-ink-700;
+  }
+
+  /* ── Dropdown menu ───────────────────────────────────────────────────── */
+  /* Floating panel shared by every dropdown / popover in the app. */
+  .ds-menu {
+    @apply absolute z-50 bg-white border border-ink-200 rounded-lg
+           shadow-overlay py-1.5 overflow-hidden animate-fade-in;
+  }
+
+  .ds-menu-item {
+    @apply w-full flex items-center gap-2.5 px-4 py-2.5 text-left
+           text-body-sm font-medium text-ink-700
+           transition-colors duration-150 cursor-pointer
+           focus:outline-none focus-visible:bg-ink-50;
+  }
+
+  .ds-menu-item:hover {
+    @apply bg-ink-50 text-navy-800;
+  }
+
+  .ds-menu-separator {
+    @apply my-1.5 border-t border-ink-200;
+  }
+
+  .ds-menu-label {
+    @apply px-4 pt-2 pb-1 ds-label;
+  }
+
+  /* ── Filter chip ──────────────────────────────────────────────────────── */  /* Compact selectable token used to narrow a list. */
+  .ds-chip {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md
+           text-caption font-semibold text-ink-600
+           bg-white border border-ink-300
+           transition-colors duration-150 ease-out cursor-pointer
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-navy-800/20;
+  }
+
+  .ds-chip:hover {
+    @apply bg-ink-50 border-ink-400 text-ink-800;
+  }
+
+  .ds-chip-active {
+    @apply bg-navy-800 border-navy-800 text-white;
+  }
+
+  .ds-chip-active:hover {
+    @apply bg-navy-900 border-navy-900 text-white;
+  }
+
+  /* ── Inline notice ───────────────────────────────────────────────────── */
+  .ds-notice {
+    @apply flex items-start gap-2.5 px-4 py-3 rounded-lg border text-body-sm;
+  }
+
+  .ds-notice-info {
+    @apply bg-navy-50 border-navy-200 text-navy-800;
+  }
+
+  .ds-notice-success {
+    @apply bg-success-50 border-success-100 text-success-800;
+  }
+
+  .ds-notice-warning {
+    @apply bg-warning-50 border-warning-100 text-warning-800;
+  }
+
+  .ds-notice-critical {
+    @apply bg-critical-50 border-critical-100 text-critical-800;
+  }
+}
+
+@media (min-width: 768px) {
+  html.ncre-sidebar-collapsed .ds-shell {
+    margin-left: 96px;
+  }
+
+  html.ncre-sidebar-collapsed #ncre-sidebar {
+    width: 96px;
+  }
+
+  /* The collapsed rail is a static icon rail. It deliberately has no
+     :hover / :focus-within expansion: the toggle lives inside the rail, so a
+     peek rule keeps it pinned at full width while the pointer (or the button's
+     own focus) is still on it, and the rail never narrows on click. */
+  html.ncre-sidebar-collapsed #ncre-sidebar .ds-sidebar-brand-copy,
+  html.ncre-sidebar-collapsed #ncre-sidebar .ds-nav-label,
+  html.ncre-sidebar-collapsed #ncre-sidebar .ds-nav-disclosure,
+  html.ncre-sidebar-collapsed #ncre-sidebar .ds-nav-sub {
+    display: none;
+  }
+
+  html.ncre-sidebar-collapsed #ncre-sidebar .ds-nav-item {
+    justify-content: center;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  /* Logo on the left, collapse toggle on the right: the only two things a
+     narrow rail can hold without clipping each other. */
+  html.ncre-sidebar-collapsed #ncre-sidebar .ds-sidebar-brand {
+    justify-content: space-between;
+    gap: 0;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  html.ncre-sidebar-collapsed #ncre-sidebar .ds-sidebar-brand > a {
+    flex: none;
+  }
+}

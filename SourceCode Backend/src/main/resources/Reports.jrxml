@@ -1,0 +1,51 @@
+<jasperReport name="Blank_A4" language="java" pageWidth="595" pageHeight="842" columnWidth="555"
+			  leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" whenNoDataType="AllSectionsNoDetail" >
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="New Data Adapter"/>
+	<parameter name="USERNAME" class="java.lang.String"/>
+	<parameter name="ID_NO" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[
+        SELECT * FROM SPSNEW.APPLICANTNEW WHERE ID_NO = $P{ID_NO}
+    ]]>
+	</queryString>
+	<field name="ID_NO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="ID_NO"/>
+		<property name="com.jaspersoft.studio.field.label" value="ID_NO"/>
+	</field>
+	<field name="FIRST_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="FIRST_NAME"/>
+		<property name="com.jaspersoft.studio.field.label" value="FIRST_NAME"/>
+	</field>
+	<background/>
+	<title>
+		<band height="100">
+			<staticText>
+				<reportElement x="0" y="0" width="555" height="50"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[SPS PROJECT]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader />
+	<columnHeader >
+		<band height="61">
+			<textField>
+				<reportElement x="100" y="11" width="100" height="30" />
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{ID_NO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="210" y="10" width="100" height="30" />
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{FIRST_NAME}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="125"/>
+	</detail>
+	<columnFooter />
+	<pageFooter />
+	<summary />
+</jasperReport>

@@ -1,0 +1,245 @@
+/*
+--Tariff Details Container 
+.details-container {
+  max-width: 1200px;
+  margin: 80px auto 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+--Tab Section 
+.tabs {
+  display: flex;
+  background-color: white;
+  border-bottom: 2px solid #e5e7eb;
+  overflow-x: auto;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 16px 24px;
+  border: none;
+  background-color: transparent;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  min-width: 180px;
+  text-align: center;
+}
+
+.tab-button:hover {
+  background-color: #f8fafc;
+  color: #374151;
+}
+
+.tab-button.active {
+  background-color: #7c0000;
+  color: white;
+  border-bottom-color: #5c0000;
+}
+
+--Content Section 
+.content-section {
+  padding: 32px;
+}
+
+.tab-content {
+  width: 100%;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+--Basic Info Grid 
+.basic-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.info-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.info-item:hover {
+  border-color: #7c0000;
+  box-shadow: 0 2px 4px rgba(124, 0, 0, 0.1);
+}
+
+.info-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #7c0000;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-size: 18px;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+--Slab Details 
+.slab-details {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.slab-details-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.slab-badge {
+  background-color: #7c0000;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.slab-badge.disabled {
+  background-color: #9ca3af;
+}
+
+.slab-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.slab-info-item {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.slab-info-item:hover {
+  border-color: #7c0000;
+  box-shadow: 0 2px 4px rgba(124, 0, 0, 0.1);
+}
+
+.slab-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.slab-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+--Raw Data Section 
+.raw-data-section {
+  margin-top: 24px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 20px;
+}
+
+.example-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 12px;
+}
+
+.example-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.example-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 14px;
+}
+
+.example-item span:first-child {
+  font-weight: 600;
+  color: #374151;
+}
+
+.example-item span:last-child {
+  color: #6b7280;
+}
+
+--Responsive Design 
+@media (max-width: 768px) {
+  .details-container {
+    margin-top: 60px;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+  
+  .content-section {
+    padding: 20px;
+  }
+  
+  .basic-info-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .slab-info-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .tabs {
+    flex-direction: column;
+  }
+  
+  .tab-button {
+    min-width: auto;
+    flex: none;
+  }
+  
+  .section-title {
+    font-size: 20px;
+  }
+}*/

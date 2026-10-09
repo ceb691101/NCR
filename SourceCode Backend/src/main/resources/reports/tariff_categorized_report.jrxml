@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+              http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="tariff_categorized_report"
+              pageWidth="595"
+              pageHeight="842"
+              columnWidth="555"
+              leftMargin="20"
+              rightMargin="20"
+              topMargin="20"
+              bottomMargin="20">
+
+    <!-- Parameters -->
+    <parameter name="REPORT_DATE" class="java.lang.String"/>
+    <parameter name="BLOCKS_DETAIL_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport"/>
+    <parameter name="TARIFFS_DETAIL_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport"/>
+    <parameter name="DOMESTIC_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport"/>
+    <parameter name="TOU_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport"/>
+    <parameter name="SIMPLE_BLOCKS_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport"/>
+    <parameter name="OTHER_CONSUMERS_SUBREPORT" class="net.sf.jasperreports.engine.JasperReport"/>
+
+    <!-- Fields from CategorySection DTO -->
+    <field name="categoryName" class="java.lang.String"/>
+    <field name="fromDate" class="java.util.Date"/>
+    <field name="categoryType" class="com.example.SPSProjectBackend.dto.CategoryType"/>
+    <field name="tariffData" class="java.util.List"/>
+
+    <!-- Title Band -->
+    <title>
+        <band height="70" splitType="Stretch">
+            <staticText>
+                <reportElement x="0" y="10" width="555" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="18" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Tariff Setup Report - Active Tariffs]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="45" width="555" height="20"/>
+                <textElement textAlignment="Center">
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Generated: " + $P{REPORT_DATE}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <!-- Detail Band -->
+    <detail>
+        <band height="100" splitType="Stretch">
+            <!-- Category Name -->
+            <textField>
+                <reportElement x="0" y="5" width="400" height="20"/>
+                <textElement>
+                    <font size="14" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{categoryName}]]></textFieldExpression>
+            </textField>
+
+            <!-- From Date -->
+            <textField>
+                <reportElement x="400" y="5" width="155" height="20"/>
+                <textElement textAlignment="Right">
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["From: " + new java.text.SimpleDateFormat("dd/MM/yyyy").format($F{fromDate})]]></textFieldExpression>
+            </textField>
+
+            <!-- Conditional Subreport -->
+            <subreport>
+                <reportElement x="0" y="30" width="555" height="60"/>
+                <subreportParameter name="BLOCKS_DETAIL_SUBREPORT">
+                    <subreportParameterExpression><![CDATA[$P{BLOCKS_DETAIL_SUBREPORT}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="TARIFFS_DETAIL_SUBREPORT">
+                    <subreportParameterExpression><![CDATA[$P{TARIFFS_DETAIL_SUBREPORT}]]></subreportParameterExpression>
+                </subreportParameter>
+                <dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{tariffData})]]></dataSourceExpression>
+                <subreportExpression><![CDATA[
+                    $F{categoryType}.toString().equals("DOMESTIC") ? $P{DOMESTIC_SUBREPORT} :
+                    $F{categoryType}.toString().equals("DOMESTIC_TOU") ? $P{TOU_SUBREPORT} :
+                    $F{categoryType}.toString().equals("AGRICULTURE_TOU") ? $P{TOU_SUBREPORT} :
+                    $F{categoryType}.toString().equals("OTHER_CONSUMERS") ? $P{OTHER_CONSUMERS_SUBREPORT} :
+                    $P{SIMPLE_BLOCKS_SUBREPORT}
+                ]]></subreportExpression>
+            </subreport>
+        </band>
+    </detail>
+
+    <!-- Page Footer -->
+    <pageFooter>
+        <band height="30" splitType="Stretch">
+            <textField>
+                <reportElement x="0" y="10" width="555" height="15"/>
+                <textElement textAlignment="Center">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+</jasperReport>

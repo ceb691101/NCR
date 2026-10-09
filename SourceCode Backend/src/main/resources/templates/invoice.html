@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Payment Invoice</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 10mm 14mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111827;
+            font-size: 11px;
+            line-height: 1.4;
+            margin: 0;
+            background: #ffffff;
+        }
+
+        .text-right {
+            text-align: right !important;
+        }
+
+        .text-left {
+            text-align: left !important;
+        }
+
+        .text-center {
+            text-align: center !important;
+        }
+
+        .font-mono {
+            font-family: monospace;
+        }
+
+        .font-bold {
+            font-weight: bold;
+        }
+
+        .underline {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div style="text-align: right; font-weight: bold; font-size: 11px; margin-bottom: 5px;" th:if="${invoice.folioNo != null and !invoice.folioNo.isEmpty()}">
+    Folio No: <span th:text="${invoice.folioNo}">1081</span>
+</div>
+<div style="position: relative; border: 1px solid #9ca3af; padding: 20px; max-width: 100%;" th:with="invoice=${invoice}, docType=${invoice.documentType ?: 'MAIN'}">
+
+    <!-- Header -->
+    <div style="width: 100%; margin-bottom: 15px; display: block; clear: both; height: 55px;">
+        <div style="float: left; width: 50%;">
+            <img th:if="${logoBase64 != null and !logoBase64.isEmpty()}" th:src="'data:image/png;base64,' + ${logoBase64}" alt="Logo" style="height: 35px; display: block; margin-bottom: 4px;" />
+            <h2 style="font-size: 15px; font-weight: bold; text-decoration: underline; margin: 0;" th:switch="${docType}">
+                <span th:case="'MAIN'">Payment Invoice</span>
+                <span th:case="'ESCROW'">Payment Invoice (ESCROW)</span>
+                <span th:case="'LOYALTY'">Payment Invoice (LOYALTY)</span>
+                <span th:case="*">Payment Invoice</span>
+            </h2>
+        </div>
+        <div style="float: right; width: 49%; text-align: right; padding-top: 15px;">
+            <table style="font-size: 11px; margin-left: auto; border-collapse: collapse;">
+                <tr>
+                    <td style="padding-right: 12px; text-align: left;">Ref No</td>
+                    <td style="padding: 0 4px;">:</td>
+                    <td style="font-weight: bold; text-align: left;" th:text="${invoice.refNo}">R0014</td>
+                </tr>
+                <tr>
+                    <td style="text-align: left;">Ref Code</td>
+                    <td style="padding: 0 4px;">:</td>
+                    <td style="font-weight: bold; text-align: left;" th:text="${invoice.refCode}">S SP1 45 303</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- Company -->
+    <div style="margin-bottom: 15px; clear: both; display: block;">
+        <table style="font-size: 11px; border-collapse: collapse;">
+            <tr>
+                <td style="width: 80px; text-align: left; padding: 2px 0;">Company</td>
+                <td style="padding: 0 4px;">:</td>
+                <td style="font-weight: bold; text-align: left; padding: 2px 0;" th:text="${invoice.companyName}">
+                    Nihon Eco Solution One (Pvt) Ltd
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: left; padding: 2px 0;">Project</td>
+                <td style="padding: 0 4px;">:</td>
+                <td style="font-weight: bold; text-align: left; padding: 2px 0;" th:text="${invoice.projectName}">
+                    Galle 1 SBSII(90) SPP
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Invoice Month -->
+    <div style="border-bottom: 1px solid #000000; padding-bottom: 3px; margin-bottom: 15px; text-align: left; display: block; width: 100%;">
+        <h3 style="font-size: 12.5px; font-weight: bold; margin: 0;" th:text="'Invoice for the month of ' + ${invoice.invoiceMonth}">
+            Invoice for the month of February 2026
+        </h3>
+    </div>
+
+    <!-- Plant Info -->
+    <div style="margin-bottom: 15px; display: block; width: 100%;">
+        <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+            <tr>
+                <td style="text-align: left; padding: 1.5px 0;">Capacity of the Plant</td>
+                <td style="width: 60px; text-align: center; padding: 1.5px 0;">MW</td>
+                <td style="width: 30px; text-align: center; padding: 1.5px 0;">=</td>
+                <td style="text-align: right; font-family: monospace; padding: 1.5px 0;" th:text="${invoice.capacityMw}">1.000</td>
+            </tr>
+            <tr>
+                <td style="text-align: left; padding: 1.5px 0;">Allowed Power Generation</td>
+                <td style="text-align: center; padding: 1.5px 0;">MW</td>
+                <td style="text-align: center; padding: 1.5px 0;">=</td>
+                <td style="text-align: right; font-family: monospace; padding: 1.5px 0;" th:text="${invoice.allowedGenerationMw}">1.000</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Reading Table -->
+    <table style="width: 100%; border: 1px solid #000000; border-collapse: collapse; text-align: center; margin-bottom: 6px; font-size: 11px;">
+        <thead>
+            <tr>
+                <th rowspan="3" style="border: 1px solid #000000; padding: 4px; background-color: #f9fafb; vertical-align: middle;">Date</th>
+                <th colspan="6" style="border: 1px solid #000000; padding: 4px; background-color: #f9fafb;">Reading</th>
+                <th rowspan="3" style="border: 1px solid #000000; padding: 4px; background-color: #f9fafb; vertical-align: middle;">mf</th>
+                <th rowspan="3" style="border: 1px solid #000000; padding: 4px; background-color: #f9fafb; vertical-align: middle;">Energy (kWh)</th>
+            </tr>
+            <tr>
+                <th colspan="3" style="border: 1px solid #000000; padding: 4px; background-color: #f9fafb;">Present</th>
+                <th colspan="3" style="border: 1px solid #000000; padding: 4px; background-color: #f9fafb;">Previous</th>
+            </tr>
+            <tr>
+                <th style="border: 1px solid #000000; padding: 3px; background-color: #f9fafb;">R1</th>
+                <th style="border: 1px solid #000000; padding: 3px; background-color: #f9fafb;">R2</th>
+                <th style="border: 1px solid #000000; padding: 3px; background-color: #f9fafb;">R3</th>
+                <th style="border: 1px solid #000000; padding: 3px; background-color: #f9fafb;">R1</th>
+                <th style="border: 1px solid #000000; padding: 3px; background-color: #f9fafb;">R2</th>
+                <th style="border: 1px solid #000000; padding: 3px; background-color: #f9fafb;">R3</th>
+            </tr>
+        </thead>
+        <tbody style="font-family: monospace;">
+            <tr>
+                <td style="border: 1px solid #000000; padding: 4px; font-family: Arial, sans-serif; text-align: left; font-weight: bold; white-space: nowrap;" th:text="${invoice.presentReadingDate}">2026-03-01</td>
+                <td style="border: 1px solid #000000; padding: 4px; text-align: right;" th:text="${invoice.presentR1}">0</td>
+                <td style="border: 1px solid #000000; padding: 4px; text-align: right;" th:text="${invoice.presentR2}">0</td>
+                <td style="border: 1px solid #000000; padding: 4px; text-align: right;" th:text="${invoice.presentR3}">0</td>
+                <td style="border: 1px solid #000000; padding: 4px; background-color: #f9fafb; text-align: center;">-</td>
+                <td style="border: 1px solid #000000; padding: 4px; background-color: #f9fafb; text-align: center;">-</td>
+                <td style="border: 1px solid #000000; padding: 4px; background-color: #f9fafb; text-align: center;">-</td>
+                <td rowspan="2" style="border: 1px solid #000000; padding: 4px; vertical-align: middle; text-align: center;" th:text="${invoice.multiplyFactor}">1.0</td>
+                <td rowspan="2" style="border: 1px solid #000000; padding: 4px; vertical-align: middle; text-align: right; font-weight: bold;" th:text="${invoice.energyKwh}">117,537.0</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #000000; padding: 4px; font-family: Arial, sans-serif; text-align: left; font-weight: bold; white-space: nowrap;" th:text="${invoice.previousReadingDate}">2026-02-01</td>
+                <td style="border: 1px solid #000000; padding: 4px; background-color: #f9fafb; text-align: center;">-</td>
+                <td style="border: 1px solid #000000; padding: 4px; background-color: #f9fafb; text-align: center;">-</td>
+                <td style="border: 1px solid #000000; padding: 4px; background-color: #f9fafb; text-align: center;">-</td>
+                <td style="border: 1px solid #000000; padding: 4px; text-align: right;" th:text="${invoice.previousR1}">0</td>
+                <td style="border: 1px solid #000000; padding: 4px; text-align: right;" th:text="${invoice.previousR2}">0</td>
+                <td style="border: 1px solid #000000; padding: 4px; text-align: right;" th:text="${invoice.previousR3}">0</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <p style="font-size: 10px; margin-bottom: 12px; text-align: left; color: #4b5563; font-style: italic;">
+        Please refer the invoice for details of date &amp; corresponding readings
+    </p>
+
+    <!-- Summary -->
+    <div style="width: 100%; display: block; margin-top: 12px; clear: both;">
+        <table style="width: 100%; font-size: 11px; margin-left: 0%; border-collapse: collapse;">
+            <tbody>
+                <tr>
+                    <td style="text-align: left; padding: 2px 0;" th:text="${invoice.eligibleEnergyLabel != null ? invoice.eligibleEnergyLabel : ('Energy after reduction of ' + (invoice.generationLossPercent != null ? invoice.generationLossPercent : '0') + '% Energy losses')}">Energy after reduction of 0% Energy losses</td>
+                    <td style="width: 60px; text-align: center; padding: 2px 0;">kWh</td>
+                    <td style="width: 30px; text-align: center; padding: 2px 0;">=</td>
+                    <td style="text-align: right; font-family: monospace; padding: 2px 0;" th:text="${invoice.eligibleEnergyKwh}">117,537</td>
+                </tr>
+                <tr>
+                    <td style="text-align: left; padding: 2px 0;">Period of generation</td>
+                    <td style="text-align: center; padding: 2px 0;">Day</td>
+                    <td style="text-align: center; padding: 2px 0;">=</td>
+                    <td style="text-align: right; font-family: monospace; padding: 2px 0;" th:text="${invoice.periodOfGeneration}">28</td>
+                </tr>
+                <tr>
+                    <td style="text-align: left; padding: 2px 0;">Plant Factor of the power plant</td>
+                    <td></td>
+                    <td style="text-align: center; padding: 2px 0;">=</td>
+                    <td style="text-align: right; font-family: monospace; padding: 2px 0;" th:text="${invoice.plantFactorPercent} + '%'">17.49%</td>
+                </tr>
+                <th:block th:if="${invoice.tariffChargeLines == null or #lists.isEmpty(invoice.tariffChargeLines)}">
+                    <tr>
+                        <td style="text-align: left; padding: 2px 0;">Energy Purchased</td>
+                        <td style="text-align: center; padding: 2px 0;">kWh</td>
+                        <td style="text-align: center; padding: 2px 0;">=</td>
+                        <td style="text-align: right; font-family: monospace; padding: 2px 0;" th:text="${invoice.energyPurchasedKwh}">117,537</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; padding: 2px 0;">Rate / kWh</td>
+                        <td style="text-align: center; padding: 2px 0;">Rs.</td>
+                        <td style="text-align: center; padding: 2px 0;">=</td>
+                        <td style="text-align: right; font-family: monospace; padding: 2px 0;" th:text="${invoice.ratePerKwh}">16.92</td>
+                    </tr>
+                    <tr style="font-weight: bold; border-top: 1px solid #000000;">
+                        <td style="text-align: left; padding: 5px 0 2px 0;">Cost of Energy</td>
+                        <td style="text-align: center; padding: 5px 0 2px 0;">Rs.</td>
+                        <td style="text-align: center; padding: 5px 0 2px 0;">=</td>
+                        <td style="text-align: right; font-family: monospace; padding: 5px 0 2px 0;" th:text="${invoice.costOfEnergy}">1,988,726.04</td>
+                    </tr>
+                </th:block>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Transition Month Split Table -->
+    <div th:if="${invoice.tariffChargeLines != null and not #lists.isEmpty(invoice.tariffChargeLines)}" style="width: 100%; display: block; margin-top: 10px; clear: both;">
+        <table style="width: 100%; font-size: 11px; border-collapse: collapse; border: 1px solid #000000;">
+            <thead>
+                <tr style="border-bottom: 1px solid #000000;">
+                    <th style="border: 1px solid #000000; padding: 4px 6px; text-align: center; font-weight: bold; width: 16%;">Tariff Rate</th>
+                    <th style="border: 1px solid #000000; padding: 4px 6px; text-align: center; font-weight: bold; width: 14%;">No. of Days</th>
+                    <th colspan="2" style="border: 1px solid #000000; padding: 4px 6px; text-align: center; font-weight: bold; width: 38%;">Energy (kWh)</th>
+                    <th style="border: 1px solid #000000; padding: 4px 6px; text-align: center; font-weight: bold; width: 20%;">Cost (Rs.)</th>
+                    <th style="border: 1px solid #000000; padding: 4px 6px; text-align: center; font-weight: bold; width: 12%;">Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="line : ${invoice.tariffChargeLines}" style="border-bottom: 1px solid #000000;">
+                    <td style="border: 1px solid #000000; padding: 4px 6px; text-align: right; font-family: monospace;" th:text="${line.ratePerKwh}">13.36</td>
+                    <td style="border: 1px solid #000000; padding: 4px 6px; text-align: center; font-family: monospace;" th:text="${line.numberOfDays}">12</td>
+                    <td style="border: 1px solid #000000; padding: 4px 6px; text-align: left; font-size: 10px; line-height: 1.2; width: 20%;">
+                        <th:block th:if="${line.dateRange != null and #strings.contains(line.dateRange, ' to ')}">
+                            <span th:text="${#strings.substringBefore(line.dateRange, ' to ') + ' to'}">2026-08-01 to</span><br/>
+                            <span th:text="${#strings.substringAfter(line.dateRange, ' to ')}">2026-08-13</span>
+                        </th:block>
+                        <span th:unless="${line.dateRange != null and #strings.contains(line.dateRange, ' to ')}" th:text="${line.dateRange}">2026-08-01 to 2026-08-13</span>
+                    </td>
+                    <td style="border: 1px solid #000000; padding: 4px 6px; text-align: right; font-family: monospace; width: 18%;" th:text="${line.energyKwh}">59,589</td>
+                    <td style="border: 1px solid #000000; padding: 4px 6px; text-align: right; font-family: monospace;" th:text="${line.costOfEnergy}">796,109.04</td>
+                    <td style="border: 1px solid #000000; padding: 4px 6px; text-align: center; font-size: 10px; line-height: 1.2;">
+                        <th:block th:if="${line.remarks != null and #strings.contains(line.remarks, 'Tariff Change')}">
+                            <span>Tariff Change</span><br/>
+                            <span th:text="${#strings.trim(#strings.replace(line.remarks, 'Tariff Change', ''))}">15+</span>
+                        </th:block>
+                        <span th:if="${line.remarks != null and not #strings.contains(line.remarks, 'Tariff Change')}" th:text="${line.remarks}"></span>
+                    </td>
+                </tr>
+                <tr style="border-bottom: 1px solid #000000; font-weight: bold;">
+                    <td style="border: 1px solid #000000; padding: 4px 6px; text-align: center; font-weight: bold;">Total</td>
+                    <td style="border: 1px solid #000000; padding: 4px 6px; text-align: center; font-family: monospace;" th:text="${invoice.periodOfGeneration}">31</td>
+                    <td style="border: 1px solid #000000; padding: 4px 6px;"></td>
+                    <td style="border: 1px solid #000000; padding: 4px 6px; text-align: right; font-family: monospace;" th:text="${invoice.energyPurchasedKwh}">216,029</td>
+                    <td style="border: 1px solid #000000; padding: 4px 6px; text-align: right; font-family: monospace;" th:text="${invoice.costOfEnergy}">2,948,723.44</td>
+                    <td style="border: 1px solid #000000; padding: 4px 6px;"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Cost of Energy row beneath table -->
+        <table style="width: 100%; font-size: 11px; margin-top: 8px; border-collapse: collapse;">
+            <tbody>
+                <tr style="font-weight: bold;">
+                    <td style="text-align: left; padding: 5px 0;">Cost of Energy</td>
+                    <td style="width: 40px; text-align: right; padding: 5px 0;">Rs.</td>
+                    <td style="width: 25px; text-align: center; padding: 5px 0;">=</td>
+                    <td style="width: 140px; text-align: right; font-family: monospace; padding: 5px 0; border-top: 1px solid #000000; border-bottom: 3px double #000000;" th:text="${invoice.costOfEnergy}">2,948,723.44</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Payment Deductions -->
+    <div th:if="${invoice.paymentDeductions != null and !invoice.paymentDeductions.isEmpty()}" style="width: 100%; display: block; margin-top: 12px; clear: both;">
+        <table style="width: 100%; font-size: 11px; margin-left: 0%; border-top: 1px solid #000000; padding-top: 8px; border-collapse: collapse;">
+            <tbody>
+                <tr>
+                    <td colspan="4" style="font-weight: bold; text-decoration: underline; padding-bottom: 5px; text-align: left;" th:switch="${docType}">
+                        <span th:case="'MAIN'">Payment Deductions</span>
+                        <span th:case="'ESCROW'">ESCROW Deduction</span>
+                        <span th:case="'LOYALTY'">Loyalty Deduction</span>
+                        <span th:case="*">Deduction</span>
+                    </td>
+                </tr>
+                <tr th:each="deduction : ${invoice.paymentDeductions}">
+                    <td style="text-align: left; padding: 2px 0;" th:text="${deduction.type}">Loyalty Deduction</td>
+                    <td style="width: 60px; text-align: center; font-family: monospace; padding: 2px 0;" th:text="${deduction.percentage} + '%'">0.00%</td>
+                    <td style="width: 30px; text-align: center; padding: 2px 0;">=</td>
+                    <td style="text-align: right; font-family: monospace; color: #dc2626; padding: 2px 0;" th:text="'- ' + ${deduction.deductionAmount}">- 0.00</td>
+                </tr>
+                <tr th:if="${docType == 'MAIN'}" style="font-weight: bold; border-top: 1px solid #000000;">
+                    <td style="text-align: left; padding: 5px 0 2px 0;">Final Amount To Be Paid To The Developer</td>
+                    <td style="text-align: center; padding: 5px 0 2px 0;">Rs.</td>
+                    <td style="text-align: center; padding: 5px 0 2px 0;">=</td>
+                    <td style="text-align: right; font-family: monospace; padding: 5px 0 2px 0;" th:text="${invoice.finalAmountToBePaid}">1,988,726.04</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Signature -->
+    <div style="margin-top: 25px; text-align: left; font-size: 11px; clear: both; display: block;">
+        <p style="margin-bottom: 2px;">Prepared by: </p>
+        <div style="height: 35px;"></div>
+        <p style="font-weight: bold; margin: 0;" th:text="${invoice.preparedBy != null and invoice.preparedBy.name != null ? invoice.preparedBy.name : invoice.preparedByName}">Eng. (Mr.) R. S. Ukwatta</p>
+        <p style="color: #4b5563; margin: 0;" th:text="${invoice.preparedBy != null and invoice.preparedBy.designation != null ? invoice.preparedBy.designation : invoice.preparedByTitle}">EE (REP3)</p>
+        <p style="font-size: 10px; color: #9ca3af; margin: 3px 0 0 0;" th:text="'Date : ' + (${invoice.preparedBy != null and invoice.preparedBy.date != null and !invoice.preparedBy.date.isEmpty()} ? ${invoice.preparedBy.date} : ${invoice.printDate})">Date : 2026/03/27</p>
+    </div>
+
+    <!-- Director Approval -->
+    <div th:if="${docType == 'MAIN'}" style="margin-top: 20px; text-align: left; font-size: 11px; display: block; width: 100%;">
+        <h4 style="font-weight: bold; text-decoration: underline; margin: 0 0 5px 0;">
+            DIRECTOR (ET-GL)
+        </h4>
+        <p style="margin: 4px 0 0 0; color: #111827; font-weight: bold; line-height: 1.45;"
+           th:text="'Payment of ' + ${finalAmountInWords} + ' (Rs. ' + ${invoice.finalAmountToBePaid} + ') is certified correct please.'">
+            Payment of One Million Nine Hundred Eighty Eight Thousand Six Hundred Rupees and Four Cents Only (Rs. 1,988,726.04) is certified correct please.
+        </p>
+    </div>
+
+    <!-- Signatures & Invoice Dates -->
+    <table style="width: 100%; margin-top: 20px; border-collapse: collapse; border: none;">
+        <tr>
+            <!-- Left Column: Chief Engineer, Director (BSTA & TM), Director -->
+            <td style="width: 58%; vertical-align: top; text-align: left; padding: 0; border: none;">
+                <!-- Chief Engineer -->
+                <div style="font-size: 11px;">
+                    <p style="font-weight: bold; margin: 0;" th:text="${invoice.chiefEngineer != null ? invoice.chiefEngineer.name : ''}"></p>
+                    <p style="color: #4b5563; margin: 0;" th:text="${invoice.chiefEngineer != null ? invoice.chiefEngineer.designation : ''}"></p>
+                    <p style="font-size: 10px; color: #9ca3af; margin: 3px 0 0 0;" th:text="'Date : ' + (${invoice.chiefEngineer != null and invoice.chiefEngineer.date != null} ? ${invoice.chiefEngineer.date} : '')">Date :</p>
+                </div>
+
+                <!-- Director (BSTA & TM) -->
+                <div style="margin-top: 18px; font-size: 11px;">
+                    <h4 style="text-decoration: underline; font-weight: bold; margin: 0 0 3px 0;">
+                        Director (BSTA & TM)
+                    </h4>
+                    <p style="color: #4b5563; margin: 0;">Payment to be settled ASAP</p>
+                </div>
+
+                <!-- Director -->
+                <div style="margin-top: 22px; font-size: 11px;">
+                    <p style="font-weight: bold; margin: 0;" th:text="${invoice.director != null ? invoice.director.name : ''}"></p>
+                    <p style="color: #4b5563; margin: 0;" th:text="${invoice.director != null ? invoice.director.designation : ''}"></p>
+                    <p style="font-size: 10px; color: #9ca3af; margin: 3px 0 0 0;" th:text="'Date : ' + (${invoice.director != null and invoice.director.date != null} ? ${invoice.director.date} : '')">Date :</p>
+                </div>
+            </td>
+
+            <!-- Right Column: invoice created on / invoice approved on -->
+            <td style="width: 42%; vertical-align: middle; text-align: left; padding: 0 0 0 20px; border: none;">
+                <div style="font-size: 12px; line-height: 2;">
+                    <p style="margin: 0; font-weight: bold;">
+                        invoice created on:- <span style="font-weight: normal;" th:text="${invoice.invoiceCreatedOn != null and !invoice.invoiceCreatedOn.isEmpty() ? invoice.invoiceCreatedOn : (invoice.preparedBy != null and invoice.preparedBy.date != null ? invoice.preparedBy.date : '')}"></span>
+                    </p>
+                    <p style="margin: 22px 0 0 0; font-weight: bold;">
+                        invoice approved on:- <span style="font-weight: normal;" th:text="${invoice.invoiceApprovedOn != null and !invoice.invoiceApprovedOn.isEmpty() ? invoice.invoiceApprovedOn : (invoice.director != null and invoice.director.date != null ? invoice.director.date : '')}"></span>
+                    </p>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Footer -->
+    <div style="margin-top: 25px; text-align: right; font-size: 9px; color: #9ca3af; font-family: monospace;" th:text="'Print on : ' + ${invoice.printDate}">
+        Print on : 2026-03-27
+    </div>
+
+</div>
+</body>
+</html>
