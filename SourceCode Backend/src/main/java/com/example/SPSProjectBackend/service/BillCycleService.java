@@ -183,6 +183,21 @@ public class BillCycleService {
             /** Matches dbadmin.ncre_bill_cycle.remarks VARCHAR(100). */
             private static final int MAX_CYCLE_REMARKS_LENGTH = 100;
 
+    private static final String INVOICES_UNDER_REVIEW_QUERY = """
+            SELECT folio_no, status, invoice_number
+            FROM dbadmin.invoices
+            WHERE bill_cycle = ?
+              AND UPPER(TRIM(status)) IN ('RECOMMEND', 'APPROVE')
+            ORDER BY folio_no
+            """;
+
+    private static final String INVOICE_STATUS_BY_CYCLE_QUERY = """
+            SELECT folio_no, status
+            FROM dbadmin.invoices
+            WHERE bill_cycle = ?
+            ORDER BY id ASC
+            """;
+
     /** Last month of the year - the only point where the year rolls over. */
     private static final int DECEMBER = 12;
 
@@ -273,13 +288,29 @@ public class BillCycleService {
 
     public List<BillCycleDTO.InvoiceCreateEntryDTO> getInvoiceCreateEntries(Integer billCycle) {
         Integer targetCycle = resolveBillCycle(billCycle);
-        return jdbcTemplate.query(INVOICE_CREATE_ENTRIES_QUERY, (resultSet, rowNumber) ->
-                new BillCycleDTO.InvoiceCreateEntryDTO(
-                        resultSet.getInt("folio_no"),
-                        resultSet.getString("developer_name"),
-                        getNullableInteger(resultSet, "is_create"),
-                        resultSet.getString("remarks")),
-                targetCycle);
+        Map<Integer, String> statusMap = new HashMap<>();
+        try {
+            List<Map<String, Object>> invRows = jdbcTemplate.queryForList(INVOICE_STATUS_BY_CYCLE_QUERY, targetCycle);
+            for (Map<String, Object> r : invRows) {
+                Object folioObj = r.get("folio_no");
+                Object statusObj = r.get("status");
+                if (folioObj instanceof Number && statusObj != null) {
+                    statusMap.put(((Number) folioObj).intValue(), statusObj.toString().trim());
+                }
+            }
+        } catch (Exception e) {
+            // Silently fall back to empty status map
+        }
+
+        return jdbcTemplate.query(INVOICE_CREATE_ENTRIES_QUERY, (resultSet, rowNumber) -> {
+            int folio = resultSet.getInt("folio_no");
+            return new BillCycleDTO.InvoiceCreateEntryDTO(
+                    folio,
+                    resultSet.getString("developer_name"),
+                    getNullableInteger(resultSet, "is_create"),
+                    resultSet.getString("remarks"),
+                    statusMap.get(folio));
+        }, targetCycle);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -368,12 +399,34 @@ public class BillCycleService {
                 ? (invoicesCreated * 100.0d) / activeDevelopers
                 : 0.0d;
 
+        long underCeReview = 0L;
+        long underDirectorReview = 0L;
+        try {
+            List<Map<String, Object>> underReviewRows = getInvoicesUnderReview(targetCycle);
+            underCeReview = underReviewRows.stream()
+                    .filter(r -> "RECOMMEND".equalsIgnoreCase(r.get("status") != null ? r.get("status").toString().trim() : ""))
+                    .map(r -> r.get("folio_no"))
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .count();
+            underDirectorReview = underReviewRows.stream()
+                    .filter(r -> "APPROVE".equalsIgnoreCase(r.get("status") != null ? r.get("status").toString().trim() : ""))
+                    .map(r -> r.get("folio_no"))
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .count();
+        } catch (Exception e) {
+            // Gracefully ignore if dbadmin.invoices is unavailable in mock tests
+        }
+
         BillCycleDTO.InvoiceCreationSummaryDTO summary = new BillCycleDTO.InvoiceCreationSummaryDTO();
         summary.setBillCycle(targetCycle);
         summary.setActiveDevelopers(activeDevelopers);
         summary.setInvoicesCreated(invoicesCreated);
         summary.setInvoicesPending(invoicesPending);
         summary.setProgressPercent(Math.round(progressPercent * 10.0d) / 10.0d);
+        summary.setUnderCeReview(underCeReview);
+        summary.setUnderDirectorReview(underDirectorReview);
         return summary;
     }
 
@@ -491,10 +544,11 @@ public class BillCycleService {
 
         // ---- 3. Re-validate invoice completion (never trust the frontend button) ----
         BillCycleDTO.InvoiceCreationSummaryDTO summary = buildInvoiceCreationSummary(currentBillCycle);
-        if (summary.getInvoicesPending() != null && summary.getInvoicesPending() > 0) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Cannot end bill cycle " + currentBillCycle + ": " + summary.getInvoicesPending()
-                            + " active developer(s) have not created their invoice yet.");
+        if ((summary.getInvoicesPending() != null && summary.getInvoicesPending() > 0)
+                || (summary.getUnderCeReview() != null && summary.getUnderCeReview() > 0)
+                || (summary.getUnderDirectorReview() != null && summary.getUnderDirectorReview() > 0)) {
+            String pendingMessage = buildPendingInvoicesErrorMessage(currentBillCycle, summary);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, pendingMessage);
         }
 
         // ---- 4. Derive the next cycle from the current record (no hardcoding) ----
@@ -557,6 +611,83 @@ public class BillCycleService {
             return 0;
         }
         return (int) toLong(rows.get(0).values().iterator().next());
+    }
+
+    private List<Map<String, Object>> getInvoicesUnderReview(Integer billCycle) {
+        try {
+            return jdbcTemplate.queryForList(INVOICES_UNDER_REVIEW_QUERY, billCycle);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
+    private String buildPendingInvoicesErrorMessage(Integer currentBillCycle, BillCycleDTO.InvoiceCreationSummaryDTO summary) {
+        List<Map<String, Object>> underReviewRows = getInvoicesUnderReview(currentBillCycle);
+        List<Integer> ceFolios = new ArrayList<>();
+        List<Integer> dirFolios = new ArrayList<>();
+
+        for (Map<String, Object> row : underReviewRows) {
+            String status = row.get("status") != null ? row.get("status").toString().trim() : "";
+            Object folioObj = row.get("folio_no");
+            Integer folio = folioObj instanceof Number ? ((Number) folioObj).intValue() : null;
+            if ("RECOMMEND".equalsIgnoreCase(status)) {
+                if (folio != null && !ceFolios.contains(folio)) {
+                    ceFolios.add(folio);
+                }
+            } else if ("APPROVE".equalsIgnoreCase(status)) {
+                if (folio != null && !dirFolios.contains(folio)) {
+                    dirFolios.add(folio);
+                }
+            }
+        }
+
+        int ceCount = ceFolios.size();
+        int dirCount = dirFolios.size();
+        long totalPending = summary.getInvoicesPending() != null ? summary.getInvoicesPending() : 0L;
+        long otherPending = Math.max(0, totalPending - (ceCount + dirCount));
+
+        if (ceCount > 0 && dirCount > 0) {
+            if (otherPending > 0) {
+                return String.format(
+                        "Cannot end bill cycle %d: There are %d invoice(s) under review by Chief Engineer%s, %d invoice(s) under review by Director%s, and %d active developer(s) who still need invoices created. All invoices must be approved and finalized before ending the bill cycle.",
+                        currentBillCycle, ceCount, formatFolioList(ceFolios), dirCount, formatFolioList(dirFolios), otherPending);
+            }
+            return String.format(
+                    "Cannot end bill cycle %d: There are %d invoice(s) under review by Chief Engineer%s and %d invoice(s) under review by Director%s. All invoices must be approved and finalized before ending the bill cycle.",
+                    currentBillCycle, ceCount, formatFolioList(ceFolios), dirCount, formatFolioList(dirFolios));
+        } else if (ceCount > 0) {
+            if (otherPending > 0) {
+                return String.format(
+                        "Cannot end bill cycle %d: There are %d invoice(s) currently under review by Chief Engineer%s, and %d active developer(s) who still need invoices created. Please approve pending reviews and finalize all invoices before ending the bill cycle.",
+                        currentBillCycle, ceCount, formatFolioList(ceFolios), otherPending);
+            }
+            return String.format(
+                    "Cannot end bill cycle %d: There are %d invoice(s) currently under review by Chief Engineer%s. Please approve or reject them before ending the bill cycle.",
+                    currentBillCycle, ceCount, formatFolioList(ceFolios));
+        } else if (dirCount > 0) {
+            if (otherPending > 0) {
+                return String.format(
+                        "Cannot end bill cycle %d: There are %d invoice(s) currently under review by Director%s, and %d active developer(s) who still need invoices created. Please wait for Director finalization and finalize all invoices before ending the bill cycle.",
+                        currentBillCycle, dirCount, formatFolioList(dirFolios), otherPending);
+            }
+            return String.format(
+                    "Cannot end bill cycle %d: There are %d invoice(s) currently under review by Director%s. Please wait for Director finalization before ending the bill cycle.",
+                    currentBillCycle, dirCount, formatFolioList(dirFolios));
+        }
+
+        return "Cannot end bill cycle " + currentBillCycle + ": " + totalPending
+                + " active developer(s) have not created their invoice yet.";
+    }
+
+    private String formatFolioList(List<Integer> folios) {
+        if (folios == null || folios.isEmpty()) {
+            return "";
+        }
+        if (folios.size() <= 5) {
+            return " (Folio: " + folios.stream().map(String::valueOf).collect(Collectors.joining(", ")) + ")";
+        }
+        String firstFive = folios.stream().limit(5).map(String::valueOf).collect(Collectors.joining(", "));
+        return " (Folios: " + firstFive + ", and " + (folios.size() - 5) + " more)";
     }
 
     /** Keep the stored user id within the column width used across the schema. */

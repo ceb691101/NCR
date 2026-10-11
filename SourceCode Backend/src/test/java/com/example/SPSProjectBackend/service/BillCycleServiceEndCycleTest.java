@@ -428,14 +428,15 @@ public class BillCycleServiceEndCycleTest {
                 billCycleService.getInvoiceCreationSummary(456);
 
         assertEquals(456, summary.getBillCycle());
-        // Both queries must be parameterised by the cycle, never by a literal
+        // All queries must be parameterised by the cycle, never by a literal
         verify(jdbcTemplate).queryForList(contains("AS active_developers"), eq(456));
         verify(jdbcTemplate).queryForList(contains("AS invoices_created"), eq(456));
+        verify(jdbcTemplate).queryForList(contains("FROM dbadmin.invoices"), eq(456));
 
         ArgumentCaptor<String> countQueries = ArgumentCaptor.forClass(String.class);
-        verify(jdbcTemplate, times(2)).queryForList(countQueries.capture(), eq(456));
+        verify(jdbcTemplate, times(3)).queryForList(countQueries.capture(), eq(456));
         assertTrue(countQueries.getAllValues().stream().allMatch(query ->
-            query.contains("dbadmin.ncre_invoice_create")
+            (query.contains("dbadmin.ncre_invoice_create") || query.contains("dbadmin.invoices"))
                 && !query.contains("dbadmin.ncre_developers")));
     }
 
@@ -684,5 +685,102 @@ public class BillCycleServiceEndCycleTest {
 
         assertThrows(DataAccessException.class,
                 () -> billCycleService.endCurrentBillCycle(SESSION_ID));
+    }
+
+    @Test
+    void endCycle_rejectsWhenInvoicesUnderChiefEngineerReview() {
+        givenValidSession();
+        givenCurrentOpenCycle(444, 2025, 8);
+        givenInvoiceCounts(444, 10, 9, 1);
+
+        Map<String, Object> underReviewRow = new HashMap<>();
+        underReviewRow.put("folio_no", 101);
+        underReviewRow.put("status", "RECOMMEND");
+        when(jdbcTemplate.queryForList(contains("FROM dbadmin.invoices"), eq(444)))
+                .thenReturn(Collections.singletonList(underReviewRow));
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> billCycleService.endCurrentBillCycle(SESSION_ID));
+
+        assertEquals(409, ex.getStatusCode().value());
+        assertTrue(ex.getReason().contains("under review by Chief Engineer"));
+        assertTrue(ex.getReason().contains("Folio: 101"));
+        assertTrue(ex.getReason().contains("Please approve or reject them before ending the bill cycle."));
+
+        verify(jdbcTemplate, never()).update(contains("UPDATE dbadmin.ncre_bill_cycle"), any(Object[].class));
+    }
+
+    @Test
+    void endCycle_rejectsWhenInvoicesUnderDirectorReview() {
+        givenValidSession();
+        givenCurrentOpenCycle(444, 2025, 8);
+        givenInvoiceCounts(444, 10, 9, 1);
+
+        Map<String, Object> underReviewRow = new HashMap<>();
+        underReviewRow.put("folio_no", 102);
+        underReviewRow.put("status", "APPROVE");
+        when(jdbcTemplate.queryForList(contains("FROM dbadmin.invoices"), eq(444)))
+                .thenReturn(Collections.singletonList(underReviewRow));
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> billCycleService.endCurrentBillCycle(SESSION_ID));
+
+        assertEquals(409, ex.getStatusCode().value());
+        assertTrue(ex.getReason().contains("under review by Director"));
+        assertTrue(ex.getReason().contains("Folio: 102"));
+        assertTrue(ex.getReason().contains("Please wait for Director finalization"));
+
+        verify(jdbcTemplate, never()).update(contains("UPDATE dbadmin.ncre_bill_cycle"), any(Object[].class));
+    }
+
+    @Test
+    void endCycle_rejectsWhenInvoicesUnderBothChiefEngineerAndDirectorReview() {
+        givenValidSession();
+        givenCurrentOpenCycle(444, 2025, 8);
+        givenInvoiceCounts(444, 10, 8, 2);
+
+        Map<String, Object> ceRow = new HashMap<>();
+        ceRow.put("folio_no", 101);
+        ceRow.put("status", "RECOMMEND");
+
+        Map<String, Object> dirRow = new HashMap<>();
+        dirRow.put("folio_no", 102);
+        dirRow.put("status", "APPROVE");
+
+        when(jdbcTemplate.queryForList(contains("FROM dbadmin.invoices"), eq(444)))
+                .thenReturn(List.of(ceRow, dirRow));
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> billCycleService.endCurrentBillCycle(SESSION_ID));
+
+        assertEquals(409, ex.getStatusCode().value());
+        assertTrue(ex.getReason().contains("under review by Chief Engineer"));
+        assertTrue(ex.getReason().contains("under review by Director"));
+        assertTrue(ex.getReason().contains("All invoices must be approved and finalized"));
+
+        verify(jdbcTemplate, never()).update(contains("UPDATE dbadmin.ncre_bill_cycle"), any(Object[].class));
+    }
+
+    @Test
+    void endCycle_rejectsWhenInvoicesUnderReviewWithOtherPending() {
+        givenValidSession();
+        givenCurrentOpenCycle(444, 2025, 8);
+        givenInvoiceCounts(444, 10, 7, 3); // 3 pending in total
+
+        Map<String, Object> ceRow = new HashMap<>();
+        ceRow.put("folio_no", 101);
+        ceRow.put("status", "RECOMMEND");
+
+        when(jdbcTemplate.queryForList(contains("FROM dbadmin.invoices"), eq(444)))
+                .thenReturn(Collections.singletonList(ceRow));
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> billCycleService.endCurrentBillCycle(SESSION_ID));
+
+        assertEquals(409, ex.getStatusCode().value());
+        assertTrue(ex.getReason().contains("under review by Chief Engineer"));
+        assertTrue(ex.getReason().contains("2 active developer(s) who still need invoices created"));
+
+        verify(jdbcTemplate, never()).update(contains("UPDATE dbadmin.ncre_bill_cycle"), any(Object[].class));
     }
 }

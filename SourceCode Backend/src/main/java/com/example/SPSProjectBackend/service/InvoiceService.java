@@ -495,7 +495,7 @@ public class InvoiceService {
         };
     }
 
-    private String renderInvoiceHtml(InvoicePreviewDTO invoice) {
+    String renderInvoiceHtml(InvoicePreviewDTO invoice) {
         if (invoice != null) {
             if (invoice.getChiefEngineer() != null && invoice.getChiefEngineer().getDesignation() != null) {
                 String d = invoice.getChiefEngineer().getDesignation().trim();
@@ -530,7 +530,10 @@ public class InvoiceService {
         }
     }
 
-    private byte[] renderPdf(String html) {
+    byte[] renderPdf(String html) {
+        if (html != null) {
+            html = html.replaceAll("&(?!(amp|lt|gt|quot|apos|#\\d+|#x[0-9a-fA-F]+);)", "&amp;");
+        }
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             PdfRendererBuilder builder = new PdfRendererBuilder();
             builder.withHtmlContent(html, "");

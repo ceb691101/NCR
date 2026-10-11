@@ -85,6 +85,12 @@ public class BillCycleDTO {
 
         @JsonProperty("progress_percent")
         private Double progressPercent;
+
+        @JsonProperty("under_ce_review")
+        private Long underCeReview;
+
+        @JsonProperty("under_director_review")
+        private Long underDirectorReview;
     }
 
     @Data
@@ -113,6 +119,13 @@ public class BillCycleDTO {
 
         @JsonProperty("remarks")
         private String remarks;
+
+        @JsonProperty("invoice_status")
+        private String invoiceStatus;
+
+        public InvoiceCreateEntryDTO(Integer folioNo, String developerName, Integer isCreate, String remarks) {
+            this(folioNo, developerName, isCreate, remarks, null);
+        }
     }
 
     // DTO for an active developer that has no created invoice for a bill cycle
